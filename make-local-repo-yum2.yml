@@ -1,5 +1,5 @@
 ---
-- hosts: hou-dc-repo
+- hosts: localhost
   tasks:
     - name: confirm apache createrepo rsync installed
       yum: name={{item}} state=installed
@@ -21,7 +21,7 @@
           insertafter="^DocumentRoot " line="Alias /centos /data/repo/centos"
     - name: restart wob server
       service: name=httpd state=restarted enabled=yes
-- hosts: hou-dc-repo-targets
+- hosts: localhost-targets
 # cat /etc/yum.repos.d/CentOS-Base.repo
 
 [base]
