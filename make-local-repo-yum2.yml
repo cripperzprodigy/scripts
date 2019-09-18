@@ -1,99 +1,37 @@
 ---
 - hosts: localhost
   tasks:
-    - name: confirm apache createrepo rsync installed
+    - name: Mount DVD read-only
+      mount:
+        path: /mnt/
+        src: /root/ansible/opt/
+        fstype: iso9660
+        opts: ro
+        state: present
+    - name: create dirs for rhel7 and EPEL repo
+      file: path={{item}} owner=apache group=apache state=directory
+      with_items:
+        - /var/www/html/rhel7
+    - name: Extract dvd contents to directory
+      command: 'tar cvf - . | (cd /var/www/html/rhel7; tar xvf -)'
+    - name: Unmounting and quick clean up
+      command: 'cd /; umount /mnt'
+    - name: Copy GPG Key
+      command: 'cp /var/www/html/rhel7/RPM-GPG-KEY-redhat-release /etc/pki/rpm-gpg/'
+    - name: Creating yum repo file
+      template:
+        src: /root/ansible/rhel7.repo.j2
+        dest: /etc/yum.repos.d/rhel7.repo
+        owner: root
+        group: root
+        mode: '0644'
+    - name: confirm apache createrepo installed
       yum: name={{item}} state=installed
       with_items:
          - httpd
          - createrepo
-         - rsync
-    - name: create dirs for centos6 and EPEL repo
-      file: path={{item}} owner=apache group=apache state=directory
-      with_items:
-         - /data/repo/centos/6.5/
-    - name: create symlink
-      file: src=/data/repo/centos/6.5/ dest=/data/repo/centos/6 state=link
-    - name: populate CentOS repository
-      command: '/usr/bin/rsync  -av --delete --delete-excluded --exclude "local*" --exclude "isos" --exclude "i386"  rsync://repos.dfw.quadranet.com/centos/6.5/ /data/repo/centos/6.5/'
-    - name: httpd.conf
-      lineinfile:
-          dest="/etc/httpd/conf/httpd.conf" regexp="^Alias /centos /data/repo/centos"
-          insertafter="^DocumentRoot " line="Alias /centos /data/repo/centos"
-    - name: restart wob server
-      service: name=httpd state=restarted enabled=yes
-- hosts: localhost-targets
-# cat /etc/yum.repos.d/CentOS-Base.repo
+    - name: yum clean all & create repo
+      command: 'yum clean all | createrepo /var/www/html/rhel7'
+    - name: Enable rhel7 repo
+      command: 'yum-config-manager --enable rhel7'
 
-[base]
-name=CentOS-$releasever - Base
-baseurl=http://repohost.loc/centos/$releasever/os/$basearch/
-gpgcheck=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
-
-#released updates 
-[updates]
-name=CentOS-$releasever - Updates
-baseurl=http://repohost.loc/centos/$releasever/updates/$basearch/
-gpgcheck=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
-
-#additional packages that may be useful
-[extras]
-name=CentOS-$releasever - Extras
-baseurl=http://repohost.loc/centos/$releasever/extras/$basearch/
-gpgcheck=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
-
-#additional packages that extend functionality of existing packages
-[centosplus]
-name=CentOS-$releasever - Plus
-baseurl=http://repohost.loc/centos/$releasever/centosplus/$basearch/
-gpgcheck=1
-enabled=0
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
-
-#contrib - packages by Centos Users
-[contrib]
-name=CentOS-$releasever - Contrib
-baseurl=http://repohost.loc/centos/$releasever/contrib/$basearch/
-gpgcheck=1
-enabled=0
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
-
-# round 2 repos
-
-[base2]
-name=CentOS-$releasever - Base
-mirrorlist=http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&repo=os
-gpgcheck=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
-
-#released updates 
-[updates2]
-name=CentOS-$releasever - Updates
-mirrorlist=http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&repo=updates
-gpgcheck=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
-
-#additional packages that may be useful
-[extras2]
-name=CentOS-$releasever - Extras
-mirrorlist=http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&repo=extras
-gpgcheck=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
-
-#additional packages that extend functionality of existing packages
-[centosplus2]
-name=CentOS-$releasever - Plus
-mirrorlist=http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&repo=centosplus
-gpgcheck=1
-enabled=0
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
-
-#contrib - packages by Centos Users
-[contrib2]
-name=CentOS-$releasever - Contrib
-mirrorlist=http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&repo=contrib
-gpgcheck=1
-enabled=0
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6

