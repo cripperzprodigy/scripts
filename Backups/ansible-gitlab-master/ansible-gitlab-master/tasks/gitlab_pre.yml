@@ -1,0 +1,43 @@
+---
+- block: # Firewall Configuration for RedHat
+
+  - name: Ensure firewalld is enabled
+    systemd:
+      name: firewalld
+      state: started
+      enabled: yes
+
+  - name: Allow some firewall to using
+    firewalld:
+      service: "{{ item }}"
+      permanent: true
+      state: enabled
+      immediate: yes
+    with_items: "{{ gitlab_firewalld_allows }}"
+
+  when: ansible_os_family == "RedHat"
+
+
+- name: Install GitLab dependencies
+  package:
+    name: "{{ gitlab_package_dependencies }}"
+    state: present
+    update_cache: yes
+  notify:
+    - Start sshd
+
+- name: Install Postfix
+  package:
+    name: postfix
+    state: present
+  notify:
+    - Start postfix
+  when: not gitlab_use_external_smtp
+
+- meta: flush_handlers
+
+- name: Run script to check system and add repository for GitLab CE
+  shell: "curl -L -s {{ gitlab_script_url }} | bash"
+  args:
+    # Not to warn about using get_url
+    warn: false

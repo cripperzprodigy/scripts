@@ -1,0 +1,29 @@
+---
+- hosts: localhost
+  become: yes
+  vars:
+    - source_iso: "files/rhel-server-7.7-x86_64-dvd.iso"
+    - dest_iso: "opt/rhel-server-7.7-x86_64-dvd.iso"
+    - repo_mount: "/mnt/dvd"
+  tasks:
+#    - name: Upload the ISO file to the remote host
+#      copy:
+#        src: "{{ source_iso }}"
+#        dest: "{{ dest_iso }}"
+#        force: no
+
+    - name: Mount the ISO file
+      mount:
+        path: "{{repo_mount}}"
+        src: "{{dest_iso}}"
+        fstype: iso9660
+        opts: loop,ro
+        state: mounted
+
+    - name: Add repository
+      yum_repository:
+        name: local
+        description: Local DVD repository
+        baseurl: "file://{{repo_mount}}"
+        enabled: yes
+        gpgcheck: no

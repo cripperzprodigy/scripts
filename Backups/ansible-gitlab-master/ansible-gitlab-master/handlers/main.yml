@@ -1,0 +1,18 @@
+---
+- name: Start postfix
+  systemd:
+    name: postfix
+    state: started
+    enabled: yes
+
+- name: Start sshd
+  systemd:
+    name: "{{ gitlab_ssh_service_name }}"
+    state: started
+    enabled: yes
+
+- name: Reconfigure GitLab
+  command: gitlab-ctl reconfigure
+
+- name: Reconfigure and restart GitLab
+  shell: gitlab-ctl reconfigure && gitlab-ctl restart

@@ -1,0 +1,60 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Create dir for mount /mnt/cdmnt
+      #file: path={{item}} owner=apache group=apache state=directory
+      file: path={{item}} state=directory
+      with_items:
+        - /mnt/cdmnt
+    - name: Mount DVD read-only
+      mount:
+        path: /mnt/cdmnt
+        src: /root/ansible/opt/rhel-server-7.7-x86_64-dvd.iso
+        fstype: iso9660
+        opts: ro,noauto
+        state: present
+    - name: create dirs for rhel7 and EPEL repo
+      #file: path={{item}} owner=apache group=apache state=directory
+      file: path={{item}} state=directory
+      with_items:
+        - /var/www/html/rhel7
+#    - name: Copy file with owner and permissions
+#      copy:
+#        src: /mnt/cdmnt/Packages/*.*
+#        dest: /var/www/html/rhel7
+#        owner: foo
+#        group: foo
+#        mode: '0644'
+#    - name: Extract dvd contents to directory
+#      command: 'cp -ar /mnt/cdmnt/Packages/*.* /var/www/html/rhel7'
+#      args:
+#        warn: false
+#    - name: Extract dvd contents to directory
+#      command: 'tar cvf - . | (cd /var/www/html/rhel7; tar xvf -)'
+#      args:
+#        warn: false
+#    - name: Unmounting and quick clean up
+#      command: 'cd /; umount /mnt'
+    - name: Copy GPG Key
+      command: 'cp /var/www/html/rhel7/RPM-GPG-KEY-redhat-release /etc/pki/rpm-gpg/'
+    - name: Creating yum repo file
+      template:
+        src: /root/ansible/rhel7.repo.j2
+        dest: /etc/yum.repos.d/rhel7.repo
+        owner: root
+        group: root
+        mode: '0644'
+    - name: confirm apache createrepo installed
+      yum: name={{item}} state=installed
+      with_items:
+         - httpd
+         - createrepo
+    - name: yum clean all & create repo
+      command: 'yum clean all | createrepo /var/www/html/rhel7'
+    - name: Enable rhel7 repo
+      command: 'yum-config-manager --enable rhel7'
+    - name: Unmount a mounted volume
+      mount:
+        path: /mnt/cdmnt
+        state: unmounted
+

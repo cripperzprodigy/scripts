@@ -1,0 +1,11 @@
+---
+- name: Install Gitlab
+  hosts: gitlab-server
+
+  roles:
+    - common
+    - gitlab
+
+  environment:
+    http_proxy: http://127.0.0.1:3129
+    https_proxy: http://127.0.0.1:3129
