@@ -1,0 +1,160 @@
+=============
+To Run
+=============
+
+App 1 (10.0.1.200, 10.0.1.201, 10.0.1.202)
+===========================================
+NodeApp
+setsid /home/adminuser/node-v6.9.1-linux-x64/bin/node /home/adminuser/aocs/runtime/bin/www/ configPath="/home/adminuser/tuas/config/nodeapp_3000" >/dev/null 2>&1 &
+
+Scheduler (10.0.1.200 only)
+cd /home/adminuser/Scheduler/ && java -jar Scheduler.jar >/dev/null  2>&1 &
+
+CATS
+setsid /home/adminuser/CATS/CATS_8877/cats.sh 8877 >/dev/null  2>&1 &
+
+ESOP 
+N.A.
+
+App 2 (10.0.1.203, 10.0.1.204, 10.0.1.205)
+===========================================
+IMDG
+N.A.
+
+Storm
+N.A.
+
+App 3 (10.0.1.206, 10.0.1.207, 10.0.1.208)
+===========================================
+Zookeeper
+/home/adminuser/zookeeper/bin/zkServer.sh start
+
+Kafka
+setsid /home/adminuser/kafka/bin/kafka-server-start.sh /home/adminuser/kafka/config/server.properties >/dev/null 2>&1 &
+
+GW (10.0.1.209, 10.0.1.210)
+===========================================
+
+Web (10.0.1.211, 10.0.1.212)
+===========================================
+NodeWeb
+setsid /home/adminuser/node-v6.9.1-linux-x64/bin/node /home/adminuser/aocs/runtime/bin/www/ configPath="/home/adminuser/tuas/config/nodeweb_5000" >/dev/null 2>&1 &
+
+DB (10.0.1.213)
+===========================================
+
+##############################################################################
+
+=====================
+To Configure Firewall
+=====================
+
+App 1
+sudo firewall-cmd --zone=public --add-port=3000/tcp --permanent
+sudo firewall-cmd --zone=public --add-port=3500/tcp --permanent
+sudo firewall-cmd --zone=public --add-port=6000/tcp --permanent
+sudo firewall-cmd --zone=public --add-port=8877/tcp --permanent
+sudo firewall-cmd --reload
+sudo firewall-cmd --list-all
+
+App 2
+
+
+App 3
+sudo firewall-cmd --zone=public --add-port=2181/tcp --permanent
+sudo firewall-cmd --zone=public --add-port=9092/tcp --permanent
+sudo firewall-cmd --reload
+sudo firewall-cmd --list-all
+
+GW
+
+Web
+sudo firewall-cmd --zone=public --add-port=4500/tcp --permanent
+sudo firewall-cmd --zone=public --add-port=5000/tcp --permanent
+sudo firewall-cmd --reload
+sudo firewall-cmd --list-all
+
+
+DB Server
+sudo firewall-cmd --zone=public --add-port=27017/tcp --permanent
+sudo firewall-cmd --zone=public --add-port=1521/tcp --permanent
+sudo firewall-cmd --zone=public --add-port=8080/tcp --permanent
+sudo firewall-cmd --reload
+sudo firewall-cmd --list-all
+
+=====================
+To Configure Modules
+=====================
+
+Zookeeper
+-zoo.cfg
+{
+	dataDir=/home/adminuser/zookeeper/dataDir
+	server.1=10.0.1.206:2888:3888
+}
+
+Kafka
+-server.properties
+{
+	port=9092
+	host.name=10.0.1.206
+	advertised.host.name=10.0.1.206
+
+	log.dirs=/home/adminuser/kafka/dataDir
+
+	zookeeper.connect=10.0.1.206:2181
+}
+
+Cats
+-cats.properties
+{
+	zookeeper.endpoints=10.0.1.206:2181
+	scheduler.url = http://10.0.1.200:3000/AOCS
+	cats.host.ip = 10.0.1.200
+	mongodb.endpoints=10.0.1.213:27017
+}
+
+-aocs-cats.json (Nodeapp/Nodeweb)
+{
+	"host" 				: "10.0.1.200",
+}
+
+Nodeapp
+-aocs-messaging.json
+{
+	"broker" 	: "10.0.1.206:2181",
+	"kafkaHost"     		: "10.0.1.206:9092",
+}
+
+-config.json
+{
+	"localHost" 	: "10.0.1.200",
+	"appHost" 		: "10.0.1.200",
+	"webHost" 		: "10.0.1.211",
+	"loadPath" 		: "/home/adminuser/",
+	"logPath" 		: "/home/adminuser/tuas/logs/",
+}
+
+Nodeweb
+-aocs-messaging.json
+{
+	"broker" 	: "10.0.1.206:2181",
+	"kafkaHost"     		: "10.0.1.206:9092",
+	"WEB_SERVER_ID": "10.0.1.211_5000"
+}
+
+-config.json
+{
+	"localHost" 	: "10.0.1.211",
+	"appHost" 		: "10.0.1.200",
+	"webHost" 		: "10.0.1.211",
+	"loadPath" 		: "/home/adminuser/",
+	"logPath" 		: "/home/adminuser/tuas/logs/",
+}
+
+Scheduler
+-scheduler.properties
+{
+	scheduler.app.host=10.0.1.200
+	kafka.host=10.0.1.206:9092
+}

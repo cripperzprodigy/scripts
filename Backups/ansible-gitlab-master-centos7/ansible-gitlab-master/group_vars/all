@@ -1,5 +1,5 @@
 # gitlab common vars
-gitlab_fqdn: http://gitlab.domain.example.com
+gitlab_fqdn: http://172.40.10.41
 
 # gitlab ad vars
 # http://doc.gitlab.com/ee/integration/ldap.html

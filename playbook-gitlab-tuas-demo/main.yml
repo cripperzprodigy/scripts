@@ -1,0 +1,90 @@
+---
+- hosts: localhost
+  vars:
+    localUser: gitlab-runner
+    hostUser: adminuser
+    FRAMEWORK_TAG: v3.2.10-Beta
+    catsip: 10.0.1.200
+  tasks:
+    - name: Ensure gitrepo directory exists.
+      file:
+        path: /home/{{ localUser }}/gitrepo
+        state: directory
+        mode: 0700
+
+    - name: Clone a private repository into ~./gitrepo/. and checkout to specific proj tag {{ FRAMEWORK_TAG }}
+      git:
+        repo: http://tuasPipeline:7dLaqYwQ7HbQwFJEWccQ@10.0.1.100/aocs-framework/aocs-framework.git
+        version: "{{ FRAMEWORK_TAG }}"
+        dest: ~/gitrepo/aocsfw
+        force: yes
+
+    # - name: Checkout project required tag
+    #   shell: "cd ~/gitrepo/aocsfw && git checkout tags/{{ FRAMEWORK_TAG }}"
+    #   delegate_to: 127.0.0.1
+
+    - name: Update aocs-cats.json
+      template:
+        src: /home/{{ localUser }}/ansible/templates/aocs-cats.json.j2
+        dest: /home/{{ localUser }}/gitrepo/aocsfw/NodeJS/runtime/config/aocs-cats.json
+
+    - name: Compress directory ~/gitrepo/aocsfw/NodeJS into /home/{{ localUser}}/aocs.tgz
+      archive:
+        path: /home/{{ localUser}}/gitrepo/aocsfw/NodeJS
+        dest: /home/{{ localUser}}/aocs.tgz
+
+- hosts: WebServers,AppServers
+  vars:
+    localUser: gitlab-runner
+    hostUser: adminuser
+  tasks:
+    - name: Kill Web Server Process
+      when: inventory_hostname in groups['WebServers']
+      shell: |
+        if [ $(ps -ef | grep -v grep | grep runtime/bin/www | grep {{ item }} | awk '{print $2}') != '' ]; then
+          kill $(ps -ef | grep -v grep | grep runtime/bin/www | grep {{ item }} | awk '{print $2}')
+        fi
+      with_items:
+        - nodeweb_5000
+
+    - name: Kill App Server Process
+      when: inventory_hostname in groups['AppServers']
+      shell: |
+        if [ $(ps -ef | grep -v grep | grep runtime/bin/www | grep {{ item }} | awk '{print $2}') != '' ]; then
+          kill $(ps -ef | grep -v grep | grep runtime/bin/www | grep {{ item }} | awk '{print $2}')
+        fi
+      with_items:
+        - nodeapp_3000
+
+    - name: Ensure gitrepo directory exists.
+      file:
+        path: /home/{{ hostUser }}/ansibletemp
+        state: directory
+        mode: 0755
+        owner: "{{ hostUser }}"
+        group: "{{ hostUser }}"
+
+    - name: Extract aocs.tgz into /home/{{ hostUser }}/ansibletemp
+      unarchive:
+        src: /home/{{ localUser}}/aocs.tgz
+        dest: /home/{{ hostUser }}/ansibletemp
+
+    - name: Delete aocs framework folder
+      file:  
+        path: /home/{{ hostUser }}/aocs
+        state: absent
+    
+    - name: Move from ansible temp folder to home folder
+      shell: "mv /home/{{ hostUser }}/ansibletemp/NodeJS /home/{{ hostUser }}/aocs"
+
+    - name: Start App Server
+      when: inventory_hostname in groups['AppServers']
+      shell: "setsid node aocs/runtime/bin/www configPath='NodeConfig/{{ item }}' >/dev/null 2>&1 &"
+      with_items:
+        - nodeapp_3000
+
+    - name: Start Web Server
+      when: inventory_hostname in groups['WebServers']
+      shell: "setsid node aocs/runtime/bin/www configPath='NodeConfig/{{ item }}' >/dev/null 2>&1 &"
+      with_items:
+        - nodeweb_5000  

@@ -1,0 +1,4 @@
+- hosts: katalonServer
+  tasks:
+    - name: Start Checking user role test case
+      command: sh /home/user/aocsFrameworkKatalon/roleCheckingTestCase.sh

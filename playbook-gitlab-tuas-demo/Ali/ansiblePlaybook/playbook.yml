@@ -1,0 +1,51 @@
+- hosts: webservers
+  tasks:
+    - name: Delete Folder aocs from Remote Host
+      file:  
+        path: ~/aocs
+        state: absent
+
+    - name: Delete Overhead Files
+      file:
+        path: /home/gitlab-runner/aocs/{{ item }}
+        state: absent
+      delegate_to: 127.0.0.1
+      with_items:
+        - .eslintignore
+        - .eslintrc.js
+        - .git
+        - .gitignore
+        - .gitlab-ci.yml
+        - Gruntfile.js
+        - karma.conf.js
+        - node_modules
+        - package.json
+
+    - name: Delete Folder aocs from working directory
+      file:  
+        path: /home/aocs
+        state: absent
+
+    - name: Zip AOCS Folder for prep for transfer
+      archive:
+        path: /home/gitlab-runner/aocs
+        dest: /home/gitlab-runner/aocs.tar.gz
+      delegate_to: 127.0.0.1
+
+    - name: Copy and Extract aocs.tar.gz into Host home folder
+      unarchive:
+        src: /home/gitlab-runner/aocs.tar.gz
+        dest: ~/
+
+    - name: Kill APP and WebServer Process
+      shell: "kill $(ps -ef | grep -v grep | grep aocs/runtime/bin/www | grep {{ item }} | awk '{print $2}')"
+      with_items:
+        - config/app
+        - config/web
+
+
+    - name: Delete aocs tar from working directory
+      file:  
+        path: /home/gitlab-runner/aocs.tar.gz
+        state: absent
+      delegate_to: 127.0.0.1

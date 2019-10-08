@@ -1,0 +1,67 @@
+---
+  - name: Clone a private repository into ~./gitrepo/.
+  git:
+    repo: tuasPipeline:7dLaqYwQ7HbQwFJEWccQ@10.0.1.100/aocs-framework/aocs-framework.git
+    version: master
+    dest: /home/adminuser/gitrepo
+    accept_hostkey: yes
+  # ssh-agent doesn't allow key to pass through remote sudo commands.
+  become: no
+
+- name: Ensure gitrepo directory exists.
+  file:
+    path: /home/adminuser/gitrepo
+    state: directory
+    mode: 0700
+    owner: adminuser
+    group: adminuser
+
+- name: Ensure .ssh directory exists.
+  file:
+    path: /home/adminuser/.ssh
+    state: directory
+    mode: 0700
+    owner: adminuser
+    group: adminuser
+
+- name: Ensure GitHub deploy key is present on the server.
+  copy:
+    content: "{{ deploy_private_key }}"
+    dest: /home/adminuser/.ssh/deploy_key
+    mode: 0600
+    owner: adminuser
+    group: adminuser
+
+# See: https://stackoverflow.com/a/37096534/100134
+- name: Ensure setfacl support is present.
+  package: name=acl
+
+- name: Clone the code repository to the docroot.
+  git:
+    repo: "{{ git_repo }}"
+    dest: /home/adminuser/gitrepo
+    accept_hostkey: yes
+    key_file: /home/adminuser/.ssh/deploy_key
+  become_user: adminuser
+
+- name: Kill APP & Web Processes
+  shell: "kill $(ps -ef | grep -v grep | grep aocs/runtime/bin/www | grep {{ item }} | awk '{print $2}')"
+  with_items:
+    - config/app
+    - config/web
+
+- name: Delete App working directory
+  when: inventory_hostname in groups['AppServers']
+  file:
+    path: /home/adminuser/app
+    state: absent
+  delegate_to: 127.0.0.1
+
+- name: Delete Web working directory
+  when: inventory_hostname in groups['WebServers']
+  file:
+    path: /home/adminuser/app
+    state: absent
+  delegate_to: 127.0.0.1
+
+
