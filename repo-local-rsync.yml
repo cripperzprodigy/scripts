@@ -1,0 +1,179 @@
+---
+- hosts: localhost
+  vars:
+    - source_iso: "files/rhel-server-7.7-x86_64-dvd.iso"
+    - dest_iso: "opt/rhel-server-7.7-x86_64-dvd.iso"
+    - repo_mount: "/mnt/dvd"
+    - repo_dest_symlink: "/data/repo/rhel/7"
+    - repo_dest: "/data/repo/rhel/7.7.1908/"
+    - pkgs_base: "pkgs_base/"
+    - proxy_env:
+        http_proxy: http://127.0.0.1:3130
+
+  tasks:
+      # Get a list of rpms from a directory
+    - name: find rpm files and register the result 
+      find:
+        paths: "{{pkgs_base}}"
+        patterns: "*.rpm"
+      register: rpm_files
+    # Create a list of the rpms to use with the yum install command
+    - set_fact:
+        rpm_list: "{{ rpm_files.files | map(attribute='path') | list}}"
+    # Use yum to install with a list
+    - name: install rpm files using rpm_list
+      yum:
+        name: "{{rpm_list}}"
+        state: present
+
+    - name: create dirs for rhel7 and EPEL repo
+      file: path={{item}} owner=apache group=apache state=directory
+      with_items:
+         - /data/repo/rhel/7.7.1908/
+    - name: create symlink
+      file: src=/data/repo/rhel/7.7.1908/ dest={{repo_dest_symlink}} state=link
+    
+    - name: Mount the ISO file
+      mount:
+        path: "{{repo_mount}}"
+        src: "{{dest_iso}}"
+        fstype: iso9660
+        opts: loop,ro
+        state: mounted
+    - name: Add repository
+      yum_repository:
+        name: rhel7
+        description: RHEL 7 Repo
+        baseurl: "file://{{repo_dest_symlink}}"
+        enabled: yes
+        gpgcheck: no
+    
+    - name: Copying dvd rpm contents to repo folder
+      copy:
+        src: "{{repo_mount}}/Packages"
+        dest: "{{repo_dest}}"
+        force: no
+      tags:
+      - dvdcopy
+
+    - name: Un-Mount the ISO file
+      mount:
+        path: "{{repo_mount}}"
+        state: absent
+
+    #   # use ip address if cannot resolve rsync path ip to use -> 96.44.142.5
+    # - name: populate rhel repository
+    #   command: '/usr/bin/rsync  -av --delete --delete-excluded --exclude "local*" --exclude "isos" --exclude "i386"  rsync://repos.dfw.quadranet.com/centos/7.7.1908/ /data/repo/rhel/7.7.1908/'
+    #   tags:
+    #   - rsyncrepo
+
+    - name: confirm apache createrepo rsync installed
+      yum: name={{item}} state=installed
+      with_items:
+         - httpd
+         - createrepo
+         - rsync      
+
+    - name: change file and dir permission / ownerships
+      file: dest=/data owner=apache group=apache mode=0775 recurse=yes
+
+    - name: Open firewall ports enable http / https
+      firewalld:
+        service: https
+        permanent: yes
+        state: enabled
+    - name: Open firewall ports enable http / https
+      firewalld:
+        service: http
+        permanent: yes
+        state: enabled
+    - name: reload firewalld
+      service: name=firewalld state=restarted enabled=yes
+
+    - name: httpd.conf
+      lineinfile:
+          dest="/etc/httpd/conf/httpd.conf" regexp="^Alias /rhel /data/repo/rhel"
+          insertafter="^DocumentRoot " line="Alias /rhel /data/repo/rhel"
+    - name: restart web server
+      service: name=httpd state=restarted enabled=yes
+
+
+# add httpd template that works to list directory listing / autoindex
+# add firewalld-cmd to add http https and reload fw rule
+
+# - hosts: localhost
+# # cat /etc/yum.repos.d/rhel-Base.repo
+
+# [base]
+# name=rhel-$releasever - Base
+# baseurl=http://repohost.loc/rhel/$releasever/os/$basearch/
+# gpgcheck=1
+# gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rhel-7
+
+# #released updates 
+# [updates]
+# name=rhel-$releasever - Updates
+# baseurl=http://repohost.loc/rhel/$releasever/updates/$basearch/
+# gpgcheck=1
+# gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rhel-7
+
+# #additional packages that may be useful
+# [extras]
+# name=rhel-$releasever - Extras
+# baseurl=http://repohost.loc/rhel/$releasever/extras/$basearch/
+# gpgcheck=1
+# gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rhel-7
+
+# #additional packages that extend functionality of existing packages
+# [rhelplus]
+# name=rhel-$releasever - Plus
+# baseurl=http://repohost.loc/rhel/$releasever/rhelplus/$basearch/
+# gpgcheck=1
+# enabled=0
+# gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rhel-7
+
+# #contrib - packages by rhel Users
+# [contrib]
+# name=rhel-$releasever - Contrib
+# baseurl=http://repohost.loc/rhel/$releasever/contrib/$basearch/
+# gpgcheck=1
+# enabled=0
+# gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rhel-7
+
+# # round 2 repos
+
+# [base2]
+# name=rhel-$releasever - Base
+# mirrorlist=http://mirrorlist.rhel.org/?release=$releasever&arch=$basearch&repo=os
+# gpgcheck=1
+# gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rhel-7
+
+# #released updates 
+# [updates2]
+# name=rhel-$releasever - Updates
+# mirrorlist=http://mirrorlist.rhel.org/?release=$releasever&arch=$basearch&repo=updates
+# gpgcheck=1
+# gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rhel-7
+
+# #additional packages that may be useful
+# [extras2]
+# name=rhel-$releasever - Extras
+# mirrorlist=http://mirrorlist.rhel.org/?release=$releasever&arch=$basearch&repo=extras
+# gpgcheck=1
+# gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rhel-7
+
+# #additional packages that extend functionality of existing packages
+# [rhelplus2]
+# name=rhel-$releasever - Plus
+# mirrorlist=http://mirrorlist.rhel.org/?release=$releasever&arch=$basearch&repo=rhelplus
+# gpgcheck=1
+# enabled=0
+# gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rhel-7
+
+# #contrib - packages by rhel Users
+# [contrib2]
+# name=rhel-$releasever - Contrib
+# mirrorlist=http://mirrorlist.rhel.org/?release=$releasever&arch=$basearch&repo=contrib
+# gpgcheck=1
+# enabled=0
+# gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rhel-7
