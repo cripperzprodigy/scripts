@@ -1,0 +1,122 @@
+---
+- hosts: localhost
+  vars:
+    - source_iso: "files/rhel-server-7.7-x86_64-dvd.iso"
+    - dest_iso: "opt/rhel-server-7.7-x86_64-dvd.iso"
+    - repo_mount: "/mnt/dvd"
+    - repo_dest_symlink: "/var/www/html/7"
+    - repo_dest: "/var/www/html/7.7.1908/"
+    - pkgs_base: "pkgs_base/"
+    - proxy_env:
+        http_proxy: http://127.0.0.1:3130
+
+  tasks:
+      # Get a list of rpms from a directory
+    - name: find rpm files and register the result 
+      find:
+        paths: "{{pkgs_base}}"
+        patterns: "*.rpm"
+      register: rpm_files
+    # Create a list of the rpms to use with the yum install command
+    - set_fact:
+        rpm_list: "{{ rpm_files.files | map(attribute='path') | list}}"
+    # Use yum to install with a list
+    - name: install rpm files using rpm_list
+      yum:
+        name: "{{rpm_list}}"
+        state: present
+
+    - name: create dirs for rhel7 and EPEL repo
+      file: path={{item}} owner=apache group=apache state=directory
+      with_items:
+         - /var/www/html/7.7.1908/
+    - name: create symlink
+      file: src=/var/www/html/7.7.1908/ dest={{repo_dest_symlink}} state=link
+    
+    - name: Mount the ISO file
+      mount:
+        path: "{{repo_mount}}"
+        src: "{{dest_iso}}"
+        fstype: iso9660
+        opts: loop,ro
+        state: mounted
+    - name: Add repository
+      yum_repository:
+        name: rhel7
+        description: RHEL 7 Repo
+        baseurl: "file://{{repo_dest_symlink}}"
+        enabled: yes
+        gpgcheck: no
+    
+    - name: Copying dvd rpm contents to repo folder
+      copy:
+        src: "{{repo_mount}}/Packages"
+        dest: "{{repo_dest}}"
+        force: no
+      tags:
+      - dvdcopy
+
+    - name: Un-Mount the ISO file
+      mount:
+        path: "{{repo_mount}}"
+        state: absent
+
+    #   # use ip address if cannot resolve rsync path ip to use -> 96.44.142.5
+    # - name: populate rhel repository
+    #   command: '/usr/bin/rsync  -av --delete --delete-excluded --exclude "local*" --exclude "isos" --exclude "i386"  rsync://repos.dfw.quadranet.com/centos/7.7.1908/ /var/www/html/7.7.1908/'
+    #   tags:
+    #   - rsyncrepo
+
+    - name: confirm apache createrepo rsync installed
+      yum: name={{item}} state=installed
+      with_items:
+         - httpd
+         - createrepo
+         - rsync      
+
+    - name: change file and dir permission / ownerships
+      file: dest=/data owner=apache group=apache mode=0775 recurse=yes
+    
+    # Handler showing how to clean yum metadata cache
+    - name: yum-clean-metadata
+      command: yum clean metadata
+      args:
+        warn: no
+    # Example removing a repository and cleaning up metadata cache
+    - name: Remove repository (and clean up left-over metadata)
+      yum_repository:
+        name: local
+        state: absent
+      notify: yum-clean-metadata
+
+    # - name: Remove repository from a specific repo file
+    #   yum_repository:
+    #     name: epel
+    #     file: external_repos
+    #     state: absent
+
+    - name: bash cmd createrepo
+      shell: createrepo '{{repo_dest_symlink}}'
+
+    - name: Open firewall ports enable http / https
+      firewalld:
+        service: https
+        permanent: yes
+        state: enabled
+    - name: Open firewall ports enable http / https
+      firewalld:
+        service: http
+        permanent: yes
+        state: enabled
+    - name: reload firewalld
+      service: name=firewalld state=restarted enabled=yes
+
+    # - name: httpd.conf
+    #   lineinfile:
+    #       dest="/etc/httpd/conf/httpd.conf" regexp="^Alias /rhel /var/www/html"
+    #       insertafter="^DocumentRoot " line="Alias /rhel /var/www/html"
+    - name: restart web server
+      service: name=httpd state=restarted enabled=yes
+
+
+### Notes on this playbook updates / task below this line ###
