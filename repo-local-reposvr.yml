@@ -4,8 +4,8 @@
     - source_iso: "files/rhel-server-7.7-x86_64-dvd.iso"
     - dest_iso: "opt/rhel-server-7.7-x86_64-dvd.iso"
     - repo_mount: "/mnt/dvd"
-    - repo_dest_symlink: "/var/www/html/7"
-    - repo_dest: "/var/www/html/7.7.1908/"
+    - repo_dest_symlink: "/var/www/html/rhel/7"
+    - repo_dest: "/var/www/html/rhel/7.7.1908/"
     - pkgs_base: "pkgs_base/"
     - proxy_env:
         http_proxy: http://127.0.0.1:3130
@@ -29,9 +29,9 @@
     - name: create dirs for rhel7 and EPEL repo
       file: path={{item}} owner=apache group=apache state=directory
       with_items:
-         - /var/www/html/7.7.1908/
+         - /var/www/html/rhel/7.7.1908/
     - name: create symlink
-      file: src=/var/www/html/7.7.1908/ dest={{repo_dest_symlink}} state=link
+      file: src=/var/www/html/rhel/7.7.1908/ dest={{repo_dest_symlink}} state=link
     
     - name: Mount the ISO file
       mount:

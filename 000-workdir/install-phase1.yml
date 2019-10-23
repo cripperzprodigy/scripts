@@ -1,0 +1,19 @@
+---
+- hosts: localhost
+  vars:
+    - source_iso: "files/rhel-server-7.7-x86_64-dvd.iso"
+    - dest_iso: "opt/rhel-server-7.7-x86_64-dvd.iso"
+    - repo_mount: "/mnt/dvd"
+    - repo_dest_symlink: "/var/www/html/7"
+    - repo_dest: "/var/www/html/7.7.1908/"
+    - pkgs_base: "pkgs_base/"
+    - proxy_env:
+        http_proxy: http://127.0.0.1:3130
+
+  tasks:
+      # Get a list of rpms from a directory
+    - name: find rpm files and register the result 
+      find:
+        paths: "{{pkgs_base}}"
+        patterns: "*.rpm"
+      register: rpm_files
