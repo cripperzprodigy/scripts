@@ -1,30 +1,30 @@
 ---
-- hosts: localhost
+- hosts: all
   vars:
-    - reposvr: "10.0.1.120"
-    - repopath: "7"
+    - reposvr: "10.0.1.20"
+    - repopath: "/rhel/7"
     # - proxy_env:
     #     http_proxy: http://127.0.0.1:3130
 
   tasks:
     - name: Add repository
       yum_repository:
-        name: rhel7
+        name: redhat
         description: RHEL 7 Repo
         baseurl: "http://{{reposvr}}/{{repopath}}"
         enabled: yes
         gpgcheck: no
-      # Handler showing how to clean yum metadata cache
-    - name: yum-clean-metadata
-      command: yum clean metadata
-      args:
-        warn: no
-    # Example removing a repository and cleaning up metadata cache
-    - name: Remove repository (and clean up left-over metadata)
-      yum_repository:
-        name: local
-        state: absent
-      notify: yum-clean-metadata
+#      # Handler showing how to clean yum metadata cache
+#    - name: yum-clean-metadata
+#      command: yum clean metadata
+#      args:
+#        warn: no
+#    # Example removing a repository and cleaning up metadata cache
+#    - name: Remove repository (and clean up left-over metadata)
+#      yum_repository:
+#        name: local
+#        state: absent
+#      notify: yum-clean-metadata
     
     - name: Standard packages install
       yum: name={{item}} state=installed

@@ -1,0 +1,18 @@
+sudo fdisk -l
+User will see a mismatch in size
+sudo parted -l
+> Enter Fix
+
+sudo fdisk /dev/sda
+type : p
+
+type : d
+
+type : n
+
+type : w
+
+resize2fs /dev/sda2
+
+for rhel 7  lvm + xfs or Ubuntu lvm
+https://computingforgeeks.com/extending-root-filesystem-using-lvm-linux/

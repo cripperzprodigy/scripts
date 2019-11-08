@@ -1,0 +1,6 @@
+---
+- hosts: nodejs_servers
+  vars_files:
+    - roles/nodejs/vars/main.yml
+  roles:
+    - nodejs

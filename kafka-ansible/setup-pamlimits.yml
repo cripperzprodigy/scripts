@@ -1,0 +1,19 @@
+---
+- hosts: storm_servers
+  vars:
+    - reposvr: "10.0.1.20"
+    - downloadpath: "/opt/downloads"
+    - storm_ver: "apache-storm-0.10.2.tar.gz"
+    - storm_path: "/opt/storm"
+
+  tasks:
+    - pam_limits:
+        domain: "{{ ansible_user }}"
+        limit_type: soft
+        limit_item: nofile
+        value: 100000
+    - pam_limits:
+        domain: "{{ ansible_ssh_user }}"
+        limit_type: soft
+        limit_item: nofile
+        value: 100000

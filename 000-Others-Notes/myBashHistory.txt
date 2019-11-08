@@ -1,0 +1,296 @@
+    1  sudo su
+    2  ls
+    3  la
+    4  ls -a
+    5  tar -xvf FilesTemplate.tar 
+    6  ls
+    7  tar -xvf myAMA.tar 
+    8  tar -xvf myCats.tar 
+    9  tar -xvf myGeoserver.tar 
+   10  ls
+   11  tar -xvf myKafka.tar 
+   12  tar -xvf myESOP.tar 
+   13  ls
+   14  tar -xvf myTuas.tar 
+   15  tar -xvf myStorm.tar 
+   16  ls
+   17  cd CATS/
+   18  ls
+   19  cd ..
+   20  ls
+   21  java -v
+   22  vi ~/.bashrc 
+   
+   vi input 
+   
+   export PATH=/home/adminuser/node-v6.9.1-linux-x64/bin:$PATH
+   export PATH=/home/adminuser/jdk1.8.0_202/bin:$PATH
+   
+   
+   23  source ./bashrc
+   24  . ~/.bashrc
+   25  java -v
+   26  ls
+   27  chmod 777 -R jdk1.8.0_202/
+   28  java -v
+   29  java -version
+   30  tar -xvf myAOCS.tar 
+   31  ls
+   32  chmod 777 -R kafka
+   33  chmod 777 -R Geoserver/
+   34  chmod 777 -R mongodb-linux-x86_64-rhel70-4.0.10/
+   35  chmod 777 -R node-v6.9.1-linux-x64/
+   36  node -v
+   37  node
+   38  mongo
+   39  mongod
+   40  sudo service mongod start
+   41  cd mongodb-linux-x86_64-rhel70-4.0.10/
+   42  ls
+   43  cd bin
+   44  ls
+   45  cd
+   46  ls
+   47  mongo
+   48  vi ~/.bashrc
+   49  cd mongodb-linux-x86_64-rhel70-4.0.10/
+   50  ls
+   51  cd bin
+   52  ls
+   //Ignore this part / Resolving mongodb 
+   53  mongo
+   54  mongod
+   55  mongoimport
+   56  vi /etc/yum.repos.d/mongodb.repo
+   57  sudo vi /etc/yum.repos.d/mongodb.repo
+   58  sudo yum install mongodb-org
+   59  rm /etc/yum.repos.d/mongodb.repo
+   60  sudo rm /etc/yum.repos.d/mongodb.repo
+   61  sudo tee /etc/yum.repos.d/mongodb-org-4.0.repo << EOF [mongodb-org-4.0] name=MongoDB Repository baseurl=https://repo.mongodb.org/yum/redhat/\$releasever/mongodborg/4.0/x86_64/ gpgcheck=1 enabled=1 gpgkey=https://www.mongodb.org/static/pgp/server-4.0.asc EOF 
+   62  cd /etc/yum.repos.d/
+   63  ls
+   64  sudo vi mongodb.repo
+   65  udo yum install mongodb-org
+   66  sudo yum install mongodb-org
+   67  sudo vi mongodb.repo
+   68  sudo yum install mongodb-org
+   69  yum repolist
+   70  ls
+   71  rm -rf mongodb.repo 
+   72  sudo rm -rf mongodb.repo 
+   73  yum repolist
+   74  cd
+   75  yum install libcurl openssl
+   76  sudo yum install libcurl openssl
+   77  ls
+   78  vi ~/.bashrc 
+   79  . ~/.bashrc
+   80  tar -zxvf mongodb-linux-x86_64-rhel70-3.2.22.tgz 
+   81  ls
+   82  cd mongodb-linux-x86_64-rhel70-3.2.22/
+   83  ls
+   84  cd bin
+   85  ls
+   86  cd ..
+   87  ls
+   88  cd
+   89  vi .bashrc 
+   90  . ~/.bashrc 
+   91  mongo
+   92  sudo cp -R mongodb-linux-x86_64-rhel70-3.2.22/bin/ /usr/bin/
+   93  mongo
+   94  ls
+   95  cd ..
+   96  ls
+   97  cd usr/
+   98  ls
+   99  cd bin/
+  100  ls
+  101  cd bin
+  102  sl
+  103  ls
+  104  mv * ..
+  105  sudo mv * ..
+  106  ls
+  107  cd ..
+  108  ls
+  109  rm bin/
+  110  rm -rf bin/
+  111  sudo rm -rf bin/
+  112  mongo
+  113  sudo service mongod start
+  114  mongo
+  115  cd
+  116  ls
+  
+  //To this part
+  117  tar -xvf mongodb-linux-x86_64-rhel70-3.0.15.tgz 
+  118  sudo cp mongodb-linux-x86_64-rhel70-3.0.15/bin/* /usr/bin/
+  119  mongo
+  120  sudo service mongod start
+  121  sudo systemctl enable mongod
+  122  sudo service mongod status
+  123  sudo systemctl enable mongod
+  124  nano /lib/systemd/system/mongodb.service
+  125  sudo vi /lib/systemd/system/mongodb.service
+  
+  vi input 
+  
+  [Unit]
+	Description=MongoDB Database Service
+	Wants=network.target
+	After=network.target
+
+	[Service]
+	ExecStart=/usr/bin/mongod --config /etc/mongod.conf
+	ExecReload=/bin/kill -HUP $MAINPID
+	Restart=always
+	User=mongodb
+	Group=mongodb
+	StandardOutput=syslog
+	StandardError=syslog
+
+	[Install]
+	WantedBy=multi-user.target
+	
+  126  ls
+  127  sudo systemctl enable mongod
+  128  sudo service mongod status
+  129  sudo service mongod start
+  130  sudo systemctl start mongodb
+  131  sudo systemctl enable mongodb.service
+  132  mongodb
+  133  mongo
+  134  sudo systemctl daemon-reload
+  135  mongo
+  136  sudo service mongod start
+  137  sudo rm /var/lib/mongodb/mongod.lock
+  138  sudo service mongod restart
+  139  sudo mongodb
+  140  sudo mongod
+  141  cd ..
+  142  ls
+  143  cd ..
+  144  ls
+  145  sudo mkdir data/db
+  146  sudo mkdir data
+  147  ls
+  148  cd data
+  149  ls
+  150  sudo mkdir db
+  151  cd
+  152  sudo mongod
+  153  sudo firewall-cmd --zone=public --permanent --add-port=27017/tcp 
+  154  sudo mongod
+  155  mongo
+  156  sudo mongod
+  157  mongod
+  158  sudo rm -rf /data/db/mongod.lock
+  159  mongod
+  160  sudo rm -rf /data/db/mongod.lock
+  161  mongod
+  162  mongo
+  163  sudo mongod
+  164  sudo mongo &
+  165  sudo mongod &
+  166  nohup sudo mongod  >/dev/null 2>&1 &
+  167  mongo
+  168  history
+  169  ls
+  170  ls -a
+  171  cp .bash_history myBashHistory.txt
+  172  ls
+  173  vi myBashHistory.txt 
+  174  history
+  175  vi myBashHistory.txt 
+  176  cat .bash_history 
+  177  echo history >> myBashHistory.txt 
+  178  vi myBashHistory.txt 
+  179  history > myBashHistory.txt 
+  180  vi myBashHistory.txt 
+  181  vi ~/.bashrc 
+  182  . ~/.bashrc 
+  183  mongo
+  184  ls
+  185  cd CATS/
+  186  ls
+  187  cd CATS_8877/
+  188  ls
+  189  ./cats.sh 8877
+  190  ls
+  191  cd
+  192  history | grep firewall
+  193  sudo firewall-cmd --zone=public --permanent --add-port=5000/tcp
+  194  sudo firewall-cmd --zone=public --permanent --add-port=4500/tcp
+  195  sudo firewall-cmd --zone=public --permanent --add-port=3500/tcp
+  196  sudo firewall-cmd --zone=public --permanent --add-port=3000/tcp
+  197  sudo firewall-cmd --zone=public --permanent --add-port=2181/tcp
+  198  sudo firewall-cmd --zone=public --permanent --add-port=8080/tcp
+  199  sudo firewall-cmd --zone=public --permanent --add-port=8443/tcp
+  200  sudo firewall-cmd --zone=public --permanent --add-port=8877/tcp
+  201  sudo firewall-cmd --zone=public --permanent --add-port=5000/tcp
+  202  sudo firewall-cmd --zone=public --permanent --add-port=6000/tcp
+  203* 
+  204  sudo firewall-cmd --zone=public --permanent --add-port=1521/tcp
+  205  sudo firewall-cmd --zone=public --permanent --remove-port=27017/tcp
+  206  history > myBashHistory.txt 
+  207  ls
+  208  tar -xvf myZookeeper.tar 
+  209  tar -xvf Scheduler.tar 
+  210  history > myBashHistory.txt 
+  211  myBashHistory 
+  212  vi myBashHistory 
+  213  vi myBashHistory.txt 
+  214  ls
+  215  cd zookeeper/
+  216  ls
+  217  cd bin/
+  218  ls
+  219  ./zkServer.sh start
+  220  cd ..
+  221  ls
+  222  cd ..
+  223  ls
+  224  chmod 777 -R zookeeper/
+  225  cd zookeeper/
+  226  ls
+  227  cd bin
+  228  ls
+  229  ./zkServer.sh start
+  230  cd ..
+  231  ls
+  232  cd dataDir/
+  233  ls
+  234  cd 
+  235  cd zookeeper/
+  236  ls
+  237  cd conf/
+  238  ls
+  239  vi zoo.cfg 
+  240  cd
+  241  cd zookeeper/
+  242  ls
+  243  cd bin/
+  244  ls
+  245  ./zkServer.sh start
+  246  cd
+  247  cd kafka
+  248  ls
+  249  cd bin/
+  250  ls
+  251  ./kafka-server-start.sh ~/kafka/config/server.properties
+  252  cd ..
+  253  ls
+  254  cd config/
+  255  ls
+  256  vi server.properties 
+  257  cd ..
+  258  cd bin/
+  259  ./kafka-server-start.sh ~/kafka/config/server.properties
+  260  ls
+  261  cd
+  262  ls
+  263  mongo
+  264  cd
+  265  history > myBashHistory
+  266  history > myBashHistory.txt

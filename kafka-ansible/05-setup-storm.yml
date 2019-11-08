@@ -1,0 +1,31 @@
+---
+- hosts: storm_servers
+  vars:
+    - reposvr: "10.0.1.20"
+    - downloadpath: "/opt/downloads"
+    - storm_ver: "apache-storm-0.10.2.tar.gz"
+    - storm_path: "/opt/storm"
+
+  tasks:
+    - name: Create directory if not exist
+      file:
+        path: /opt/downloads
+        state: directory
+        mode: '0755'
+
+    - name: Get storm from local server
+      get_url:
+        url: "http://{{reposvr}}/misc/apache-storm/{{storm_ver}}"
+        dest: '{{downloadpath}}'
+
+    - name: Create directory if not exist
+      file:
+        path: '{{storm_path}}'
+        state: directory
+        mode: '0755'
+
+    - name: Unarchiving Storm
+      unarchive:
+        src: '{{downloadpath}}/{{storm_ver}}'
+        dest: '{{ deploy_dir }}'
+        remote_src: yes

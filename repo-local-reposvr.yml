@@ -77,17 +77,17 @@
     - name: change file and dir permission / ownerships
       file: dest=/data owner=apache group=apache mode=0775 recurse=yes
     
-    # Handler showing how to clean yum metadata cache
-    - name: yum-clean-metadata
-      command: yum clean metadata
-      args:
-        warn: no
-    # Example removing a repository and cleaning up metadata cache
-    - name: Remove repository (and clean up left-over metadata)
-      yum_repository:
-        name: local
-        state: absent
-      notify: yum-clean-metadata
+    # # Handler showing how to clean yum metadata cache
+    # - name: yum-clean-metadata
+    #   command: yum clean metadata
+    #   args:
+    #     warn: no
+    # # Example removing a repository and cleaning up metadata cache
+    # - name: Remove repository (and clean up left-over metadata)
+    #   yum_repository:
+    #     name: local
+    #     state: absent
+    #   notify: yum-clean-metadata
 
     # - name: Remove repository from a specific repo file
     #   yum_repository:
