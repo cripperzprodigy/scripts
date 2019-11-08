@@ -1,0 +1,4 @@
+reposvr: "10.0.1.20"
+downloadpath: "/opt/downloads"
+storm_ver: "apache-storm-0.10.2.tar.gz"
+storm_path: "/opt/storm"
