@@ -3,20 +3,28 @@
 kafka_packages:
   - name: zookeeper
     version: 3.4.6
-    url: "http://10.0.1.20/misc/apache-zookeeper/zookeeper-3.4.6.tar.gz"
+    url: "http://{{reposvr_ini_misc}}/apache-zookeeper/zookeeper-3.4.6.tar.gz"
     
   - name: kafka
     version: 2.10-0.10.0.1
-    url: "http://10.0.1.20/misc/apache-kafka/kafka_2.10-0.10.0.1.tgz"
+    url: "http://{{reposvr_ini_misc}}/apache-kafka/kafka_2.10-0.10.0.1.tgz"
+
+  - name: jdk
+    version: jdk1.8.0_202-amd64
+    url: "http://{{reposvr_ini_rpms}}/jdk-8u202-linux-x64.rpm"
     
 
 
 kafka_under_gfw:
   - name: zookeeper
     version: 3.4.6
-    url: "http://10.0.1.20/misc/apache-zookeeper/zookeeper-3.4.6.tar.gz"
+    url: "http://{{reposvr_ini_misc}}/apache-zookeeper/zookeeper-3.4.6.tar.gz"
     
   - name: kafka
     version: 2.10-0.10.0.1
-    url: "http://10.0.1.20/misc/apache-kafka/kafka_2.10-0.10.0.1.tgz"
+    url: "http://{{reposvr_ini_misc}}/apache-kafka/kafka_2.10-0.10.0.1.tgz"
+
+  - name: jdk
+    version: jdk1.8.0_202-amd64
+    url: "http://{{reposvr_ini_rpms}}/jdk-8u202-linux-x64.rpm"
     

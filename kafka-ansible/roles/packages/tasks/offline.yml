@@ -13,13 +13,13 @@
   copy:
     src: "{{ downloads_dir }}/{{ jdk_rpm_file }}"
     dest: "/tmp/{{ jdk_rpm_file }}"
-    remote_src: no
+    remote_src: yes
 
 - name: Copy unzip rpm from local
   copy:
     src: "{{ downloads_dir }}/{{ unzip_rpm_file }}"
     dest: "/tmp/{{ unzip_rpm_file }}"
-    remote_src: no
+    remote_src: yes
   when: unzip_st.stdout|int != 1
 
 - name: Ensure jdk rpm is installed

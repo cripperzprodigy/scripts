@@ -1,6 +1,76 @@
 ---
-- hosts: nodejs_servers
+- name: NodeJS
+  hosts: nodejs_servers
+  become: true
+  gather_subset: all
+
   vars_files:
     - roles/nodejs/vars/main.yml
+    - roles/nodejs/defaults/main.yml
   roles:
-    - nodejs
+    - role: nodejs
+
+  # pre_tasks:
+  #   - name: Update apt cache.
+  #     apt: update_cache=true cache_valid_time=600
+  #     when: ansible_os_family == 'Debian'
+
+
+# ---
+# - hosts: nodejs_servers
+#   vars_files:
+#     - roles/nodejs/vars/main.yml
+#     - roles/nodejs/defaults/main.yml
+#   roles:
+#     - nodejs
+
+# ---
+# - name: Install curl and wget
+#   gather_facts: 'no'
+#   hosts: nodejs_servers
+#   become: yes
+#   remote_user: root
+
+#   tasks:
+#     - name: Install curl
+#       yum:
+#         name: curl
+#         state: present
+
+#     - name: Install wget
+#       yum:
+#         name: wget
+#         state: present
+
+# - name: Create nvm
+#   gather_facts: 'no'
+#   hosts: nodejs_servers
+#   become: yes
+#   remote_user: root
+
+#   roles:
+#     - role: ansible-role-nvm
+#       # nodejs_version: '10.16.0'
+#       nodejs_version: '6.17.1'
+
+# ## Credits to John Lieske - https://www.ansible.com/blog/getting-started-writing-your-first-playbook
+# - name: Install Nginx
+#   hosts: nodejs_servers
+#   become: yes
+#   remote_user: root
+
+#   tasks:
+#     - name: Add epel-release repo
+#       yum:
+#         name: epel-release
+#         state: present
+
+#     - name: Install Nginx
+#       yum:
+#         name: nginx
+#         state: present
+
+#     - name: Start NGiNX
+#       service:
+#         name: nginx
+#         state: started

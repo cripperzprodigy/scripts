@@ -1,37 +1,72 @@
 ---
-- name: Set up the Nodesource RPM directory for Node.js > 0.10.
-  set_fact:
-    nodejs_rhel_rpm_dir: "pub_{{ nodejs_version }}"
-  when: nodejs_version != '0.10'
+- name: Create a directory {{ nodejs_ini_deploy }}
+  file:
+    path: "{{nodejs_ini_deploy}}"
+    state: directory
+    mode: '0755'
+  become: true
 
-- name: Set up the Nodesource RPM variable for Node.js == 0.10.
-  set_fact:
-    nodejs_rhel_rpm_dir: "pub"
-  when: nodejs_version == '0.10'
+- name: Recursively change ownership of a directory
+  file:
+    path: "{{nodejs_ini_deploy}}"
+    state: directory
+    recurse: yes
+    owner: "{{ansible_user}}"
+    group: "{{ansible_user}}"
+  # become: true
 
-- name: Import Nodesource RPM key (CentOS < 7).
-  rpm_key:
-    key: http://rpm.nodesource.com/pub/el/NODESOURCE-GPG-SIGNING-KEY-EL
-    state: present
-  when: ansible_distribution_major_version|int < 7
+- name: Download Nodejs from Local URL
+  get_url:
+    url: "{{ nodejs_ini_url }}"
+    dest: "{{ nodejs_ini_deploy }}/{{nodejs_ini_file}}"
 
-- name: Import Nodesource RPM key (CentOS 7+)..
-  rpm_key:
-    key: https://rpm.nodesource.com/pub/el/NODESOURCE-GPG-SIGNING-KEY-EL
-    state: present
-  when: ansible_distribution_major_version|int >= 7
+- name: Unarchive node-v6.17.1-linux-x64.tar.gz
+  unarchive:
+    src: "{{ nodejs_ini_deploy }}/{{nodejs_ini_file}}"
+    dest: "{{nodejs_ini_deploy}}"
+    remote_src: yes
 
-- name: Add Nodesource repositories for Node.js (CentOS < 7).
-  yum:
-    name: "http://rpm.nodesource.com/{{ nodejs_rhel_rpm_dir }}/el/{{ ansible_distribution_major_version }}/{{ ansible_architecture }}/nodesource-release-el{{ ansible_distribution_major_version }}-1.noarch.rpm"
-    state: present
-  when: ansible_distribution_major_version|int < 7
+- name: Recursively change ownership of a directory
+  file:
+    path: "{{nodejs_ini_deploy}}"
+    state: directory
+    recurse: yes
+    owner: "{{ansible_user}}"
+    group: "{{ansible_user}}"
 
-- name: Add Nodesource repositories for Node.js (CentOS 7+).
-  yum:
-    name: "https://rpm.nodesource.com/{{ nodejs_rhel_rpm_dir }}/el/{{ ansible_distribution_major_version }}/{{ ansible_architecture }}/nodesource-release-el{{ ansible_distribution_major_version }}-1.noarch.rpm"
-    state: present
-  when: ansible_distribution_major_version|int >= 7
+# - name: Set up the Nodesource RPM directory for Node.js > 0.10.
+#   set_fact:
+#     nodejs_rhel_rpm_dir: "pub_{{ nodejs_version }}"
+#   when: nodejs_version != '0.10'
 
-- name: Ensure Node.js and npm are installed.
-  yum: "name=nodejs-{{ nodejs_version|regex_replace('x', '') }}* state=present enablerepo='nodesource'"
+# - name: Set up the Nodesource RPM variable for Node.js == 0.10.
+#   set_fact:
+#     nodejs_rhel_rpm_dir: "pub"
+#   when: nodejs_version == '0.10'
+
+# - name: Import Nodesource RPM key (CentOS < 7).
+#   rpm_key:
+#     key: http://rpm.nodesource.com/pub/el/NODESOURCE-GPG-SIGNING-KEY-EL
+#     state: present
+#   when: ansible_distribution_major_version|int < 7
+
+# - name: Import Nodesource RPM key (CentOS 7+)..
+#   rpm_key:
+#     key: https://rpm.nodesource.com/pub/el/NODESOURCE-GPG-SIGNING-KEY-EL
+#     state: present
+#   when: ansible_distribution_major_version|int >= 7
+
+# - name: Add Nodesource repositories for Node.js (CentOS < 7).
+#   yum:
+#     name: "http://rpm.nodesource.com/{{ nodejs_rhel_rpm_dir }}/el/{{ ansible_distribution_major_version }}/{{ ansible_architecture }}/nodesource-release-el{{ ansible_distribution_major_version }}-1.noarch.rpm"
+#     state: present
+#   when: ansible_distribution_major_version|int < 7
+
+# - name: Add Nodesource repositories for Node.js (CentOS 7+).
+#   yum:
+#     name: "https://rpm.nodesource.com/{{ nodejs_rhel_rpm_dir }}/el/{{ ansible_distribution_major_version }}/{{ ansible_architecture }}/nodesource-release-el{{ ansible_distribution_major_version }}-1.noarch.rpm"
+#     state: present
+#   when: ansible_distribution_major_version|int >= 7
+
+# - name: Ensure Node.js and npm are installed.
+#   yum: "name=nodejs-{{ nodejs_version|regex_replace('x', '') }}* state=present enablerepo='nodesource'"

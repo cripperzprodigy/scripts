@@ -1,6 +1,9 @@
 ---
 - hosts: storm_servers
+  become: true
+  gather_subset: all
   vars_files:
     - roles/storm/vars/main.yml
   roles:
     - storm
+

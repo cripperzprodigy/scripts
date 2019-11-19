@@ -1,0 +1,18 @@
+
+
+files to be downloaded from the miscsvr01 
+## kafka zookeeper storm nodejs check version in TG, correct the playbook version
+download geoserver 2.16 and install
+
+consolidate version into inventory ini file for all kafka, zookeeper, nodejs, storm, geoserver
+
+ansible secrets / password for sudo use
+
+sanity check for kafka / zookeeper
+
+improve roles/download on outbound network and gfw sanity check
+improve roles/packages online and offline installations
+
+#storm
+set env user path for storm to install dir
+sanity check to grep storm version

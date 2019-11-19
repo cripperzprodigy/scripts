@@ -19,16 +19,7 @@ base_kafka_port: 9090
 # Random shifts for retrying failed ops like downloading
 retry_stagger: 5
 
-offline_deployment: True
-
-# jdk_rpm_file: "jdk-8u152-linux-x64.rpm"
-# jdk_version: "jdk1.8.0_152"
-
-jdk_rpm_file: "jdk-8u202-linux-x64.rpm"
-jdk_version: "jdk1.8.0_202-amd64"
-
-unzip_rpm_file: "unzip-6.0-16.el7.x86_64.rpm"
-
+offline_deployment: false
 
 # host count to change mode (simple / clustered)
 #HOST: "{{ groups['kafka_servers'] }}"

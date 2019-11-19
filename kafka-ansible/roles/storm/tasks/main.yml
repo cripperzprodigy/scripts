@@ -1,23 +1,49 @@
 ---    
 - name: Create directory if not exist
   file:
-    path: /opt/downloads
+    path: "{{storm_ini_deploy}}"
     state: directory
     mode: '0755'
+  become: yes
+
+- name: Recursively change ownership of a directory
+  file:
+    path: "{{storm_ini_deploy}}"
+    state: directory
+    recurse: yes
+    owner: "{{ansible_user}}"
+    group: "{{ansible_user}}"
+  # become: true
+
+- name: Ensure jdk rpm is installed
+  yum:
+    name: "jdk"
+    state: present
+  become: true
 
 - name: Get storm from local server
   get_url:
-    url: "http://{{reposvr}}/misc/apache-storm/{{storm_ver}}"
-    dest: '{{downloadpath}}'
-
-- name: Create directory if not exist
-  file:
-    path: '{{storm_path}}'
-    state: directory
-    mode: '0755'
+    url: "{{storm_ini_url}}"
+    dest: '{{storm_ini_deploy}}'
+  become: yes
 
 - name: Unarchiving Storm
   unarchive:
-    src: '{{downloadpath}}/{{storm_ver}}'
-    dest: '{{ deploy_dir }}'
+    src: '{{storm_ini_deploy}}/{{storm_ini_file}}'
+    dest: '{{ storm_ini_deploy }}'
     remote_src: yes
+
+- name: Recursively change ownership of a directory
+  file:
+    path: "{{storm_ini_deploy}}"
+    state: directory
+    recurse: yes
+    owner: "{{ansible_user}}"
+    group: "{{ansible_user}}"
+  # become: true
+
+- name: Add storm $PATH bin directory to global $PATH.
+  template:
+    src: storm.sh.j2
+    dest: /etc/profile.d/storm.sh
+    mode: 0644

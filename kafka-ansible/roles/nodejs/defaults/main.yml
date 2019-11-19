@@ -13,8 +13,14 @@ npm_config_prefix: "/usr/local/lib/npm"
 # set explicitly to false, then installing as a non-root user will fail.
 npm_config_unsafe_perm: "true"
 
+nodejs_npm_global_packages:
+  - node-sass
+  - name: jslint
+    version: 0.12.0
+  - name: yo
+
 # Define a list of global packages to be installed with NPM.
-nodejs_npm_global_packages: []
+# nodejs_npm_global_packages: []
 #  # Install a specific version of a package.
 #  - name: jslint
 #    version: 0.9.3
