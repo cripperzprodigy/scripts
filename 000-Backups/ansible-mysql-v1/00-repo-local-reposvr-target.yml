@@ -1,0 +1,70 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: true
+  vars:
+    - reposvr: "{{ reposvr_ini }}"
+    - repopath: "/rhel/7"
+    # - proxy_env:
+    #     http_proxy: http://127.0.0.1:3130
+
+  # pre_tasks:
+  #  - name: Install the MySQL repo.
+  #    yum:
+  #      name: http://repo.mysql.com/mysql-community-release-el7-5.noarch.rpm
+  #      state: present
+  #    when: ansible_os_family == "RedHat"
+
+  #  - name: Override variables for MySQL (RedHat).
+  #    set_fact:
+  #      mysql_daemon: mysqld
+  #      mysql_packages: ['mysql-server']
+  #      mysql_log_error: /var/log/mysqld.err
+  #      mysql_syslog_tag: mysqld
+  #      mysql_pid_file: /var/run/mysqld/mysqld.pid
+  #      mysql_socket: /var/lib/mysql/mysql.sock
+  #    when: ansible_os_family == "RedHat"  
+
+  tasks:
+   - name: Remove repository (and clean up left-over metadata)
+     yum_repository:
+       name: epel
+       state: absent
+     become: true
+   - name: Remove repository (and clean up left-over metadata)
+     yum_repository:
+       name: epel-testing
+       state: absent
+     become: true  
+     # Example removing a repository and cleaning up metadata cache
+   - name: Remove repository (and clean up left-over metadata)
+     yum_repository:
+       name: rhel7
+       state: absent
+     become: true
+  
+   - name: Add repository
+     yum_repository:
+       name: rhel7
+       description: RHEL 7 Repo
+       baseurl: "http://{{reposvr}}/{{repopath}}"
+       enabled: yes
+       gpgcheck: no
+     become: true
+     # Handler showing how to clean yum metadata cache
+   - name: yum-clean-metadata
+     command: yum clean metadata
+     args:
+       warn: no
+     
+   - name: Standard packages install
+     yum: name={{item}} state=installed
+     with_items:
+        - nano
+        - rsync
+        - screen
+        - ntp
+        - epel-release
+     become: true      
+   
+   - include_tasks: "{{playbook_dir}}/roles/ntpd/tasks/main.yml"

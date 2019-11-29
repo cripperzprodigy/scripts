@@ -1,0 +1,19 @@
+---    
+- name: Updating ntp.conf to point to local NTP Server
+  template:
+    src: "{{playbook_dir}}/roles/ntpd/templates/ntp.conf.j2"
+    dest: "/etc/ntp.conf"
+    mode: 0755
+    backup: yes
+
+- name: enable ntpd
+  service: name=ntpd state=started
+  ignore_errors: false
+  
+- name: Preflight check - Make sure NTP service is running and ntpstat is synchronised to NTP server
+  shell: ntpstat | grep -w synchronised | wc -l
+  register: ntp_st
+  ignore_errors: true
+  # failed_when: ntp_st.stdout|int != 1
+  # changed_when: false
+  # when: enable_ntpd

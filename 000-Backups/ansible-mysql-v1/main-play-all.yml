@@ -1,0 +1,9 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: true
+  vars_files:
+    - group_vars/all.yml
+  tasks:
+  - include_tasks: 00-repo-local-reposvr-target.yml
+  - include_tasks: 01-install-mysql.yml

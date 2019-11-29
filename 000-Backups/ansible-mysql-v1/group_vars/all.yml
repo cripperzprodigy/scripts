@@ -1,0 +1,35 @@
+---
+
+# Variables here are applicable to all host groups
+backup_dir: "{{ deploy_dir }}/backup"
+package_dir: "{{ deploy_dir }}/package"
+
+# Local
+ansible_log_dir: "{{ playbook_dir }}/log"
+downloads_dir: "{{ playbook_dir }}/downloads"
+conf_dir: "{{ playbook_dir }}/conf"
+
+# # mysql vars
+mysql_root_password: Password123
+mysql_databases:
+  - name: fortifydb
+    encoding: utf8
+    collation: utf8_general_ci
+  - name: example_db
+    encoding: utf8
+    collation: utf8_general_ci
+
+mysql_users:
+  - name: example_user
+    host: "%"
+    password: Password123
+    priv: "example_db.*:ALL"
+  - name: adminuser
+    host: "%"
+    password: P@ssw0rd123
+    priv: "fortifydb.*:ALL"
+# Random shifts for retrying failed ops like downloading
+retry_stagger: 2
+
+ #offline_deployment: false
+

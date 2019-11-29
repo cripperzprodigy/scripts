@@ -1,3 +1,0 @@
----
-- name: configure gitlab
-  command: gitlab-ctl reconfigure
